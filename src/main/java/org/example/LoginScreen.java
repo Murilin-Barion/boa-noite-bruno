@@ -76,11 +76,13 @@ public class LoginScreen extends JFrame {
                 if (user.isEmpty() || password.isEmpty()) {
                     JOptionPane.showMessageDialog(LoginScreen.this, "Por favor, preencha todos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    // lógica
-                    JOptionPane.showMessageDialog(LoginScreen.this, "Login bem-sucedido!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    //logica
+                    new FinanceManagerScreen(user).setVisible(true);
+                    dispose();
                 }
             }
         });
+
 
         // Botão de cadastrar
         JButton registerButton = new JButton("CADASTRAR");
@@ -92,6 +94,7 @@ public class LoginScreen extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 new RegisterScreen();
+                dispose();
             }
         });
 
@@ -202,6 +205,7 @@ class RegisterScreen extends JFrame {
                 } else {
                     // lógica
                     JOptionPane.showMessageDialog(RegisterScreen.this, "Cadastro realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                    new LoginScreen();
                     dispose();
                 }
             }
@@ -221,5 +225,6 @@ class RegisterScreen extends JFrame {
         mainPanel.add(formPanel, BorderLayout.CENTER);
         add(mainPanel);
         setVisible(true);
+
     }
 }
