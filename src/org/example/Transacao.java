@@ -24,4 +24,12 @@ public class Transacao {
     public double getValor() {
         return valor;
     }
+
+    public LocalDate getData() {
+        return data;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
 }
