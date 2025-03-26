@@ -6,6 +6,7 @@ import java.util.List;
 public class BancoUsuarios {
     private static List<Usuario> usuarios = new ArrayList<>();
 
+
     public static void adicionarUsuario(Usuario usuario) {
         usuarios.add(usuario);
     }

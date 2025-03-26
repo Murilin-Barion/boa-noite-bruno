@@ -70,14 +70,15 @@ public class LoginScreen extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String user = userField.getText();
-                String password = new String(passwordField.getPassword());
+                String email = userField.getText();
+                String senha = new String(passwordField.getPassword());
 
-                if (user.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(LoginScreen.this, "Por favor, preencha todos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
+                Usuario usuario = BancoUsuarios.autenticar(email, senha);
+
+                if (usuario == null) {
+                    JOptionPane.showMessageDialog(LoginScreen.this, "Email ou senha incorretos.", "Erro", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    //logica
-                    new FinanceManagerScreen(user).setVisible(true);
+                    new FinanceManagerScreen(usuario).setVisible(true);
                     dispose();
                 }
             }
@@ -203,7 +204,8 @@ class RegisterScreen extends JFrame {
                 if (name.isEmpty() || password.isEmpty() || email.isEmpty()) {
                     JOptionPane.showMessageDialog(RegisterScreen.this, "Por favor, preencha todos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    // lógica
+                    Usuario novoUsuario = new Usuario(name, email, password);
+                    BancoUsuarios.adicionarUsuario(novoUsuario);
                     JOptionPane.showMessageDialog(RegisterScreen.this, "Cadastro realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                     new LoginScreen();
                     dispose();

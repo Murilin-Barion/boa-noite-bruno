@@ -8,7 +8,7 @@ public class FinanceManagerScreen extends JFrame {
     private JComboBox<String> categoryComboBox, typeComboBox;
     private JLabel balanceLabel, incomeLabel, expenseLabel;
 
-    public FinanceManagerScreen(String username) {
+    public FinanceManagerScreen(Usuario user) {
         setTitle("Gerenciador Financeiro");
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -16,7 +16,7 @@ public class FinanceManagerScreen extends JFrame {
 
         // Barra de menu do usuário
         JMenuBar menuBar = new JMenuBar();
-        JMenu userMenu = new JMenu("Usuário: " + username);
+        JMenu userMenu = new JMenu("Usuário: " + user.getNome());
         JMenuItem logoutItem = new JMenuItem("Sair");
         logoutItem.addActionListener(e -> {
             this.dispose();
