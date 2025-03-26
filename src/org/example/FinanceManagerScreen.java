@@ -36,7 +36,7 @@ public class FinanceManagerScreen extends JFrame {
         formPanel.setBorder(BorderFactory.createTitledBorder("Cadastro de Transações"));
 
         formPanel.add(new JLabel("Tipo:"));
-        typeComboBox = new JComboBox<>(new String[]{"Receita", "Despesa"});
+        typeComboBox = new JComboBox<>(new String[]{"Receita (+)", "Despesa (-)"});
         formPanel.add(typeComboBox);
 
         formPanel.add(new JLabel("Categoria:"));
