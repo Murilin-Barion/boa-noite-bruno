@@ -35,4 +35,42 @@ public class Usuario {
     public List<Transacao> getTransacoes() {
         return transacoes;
     }
+
+    public double getTotalTransacoes(){
+        double saldo = 0;
+
+        for (Transacao transacao : transacoes) {
+            if (transacao.getTipo().equalsIgnoreCase("Receita")) {
+                saldo += transacao.getValor();
+            } else {
+                saldo -= transacao.getValor();
+            }
+        }
+
+        return saldo;
+    }
+
+    public double getTotalReceitas(){
+        double saldo = 0;
+
+        for (Transacao transacao : transacoes) {
+            if (transacao.getTipo().equalsIgnoreCase("Receita")) {
+                saldo += transacao.getValor();
+            }
+        }
+
+        return saldo;
+    }
+
+    public double getTotalDespesas(){
+        double saldo = 0;
+
+        for (Transacao transacao : transacoes) {
+            if (transacao.getTipo().equalsIgnoreCase("Despesa")) {
+                saldo += transacao.getValor();
+            }
+        }
+
+        return saldo;
+    }
 }

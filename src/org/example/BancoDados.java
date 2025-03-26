@@ -3,15 +3,17 @@ package org.example;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BancoUsuarios {
+public class BancoDados {
     private static List<Usuario> usuarios = new ArrayList<>();
-
+    private static List<Categoria> categorias = new ArrayList<>();
 
     public static void adicionarUsuario(Usuario usuario) {
-        usuarios.add(usuario);
+        if (!usuarios.contains(usuario)) {
+            usuarios.add(usuario);
+        }
     }
 
-    public static Usuario autenticar(String email, String senha) {
+    public static Usuario autenticarUsuario(String email, String senha) {
         for (Usuario usuario : usuarios) {
             if (usuario.getEmail().equals(email) && usuario.verificarSenha(senha)) {
                 return usuario;
@@ -22,5 +24,15 @@ public class BancoUsuarios {
 
     public static List<Usuario> getUsuarios() {
         return usuarios;
+    }
+
+    public static void adicionarCategoria(Categoria categoria) {
+        if (!categorias.contains(categoria)) {
+            categorias.add(categoria);
+        }
+    }
+
+    public static List<Categoria> getCategorias() {
+        return categorias;
     }
 }

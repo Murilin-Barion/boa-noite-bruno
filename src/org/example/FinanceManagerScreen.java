@@ -73,9 +73,9 @@ public class FinanceManagerScreen extends JFrame {
         summaryPanel.setLayout(new GridLayout(3, 1, 10, 10));
         summaryPanel.setBorder(BorderFactory.createTitledBorder("Resumo Financeiro"));
 
-        balanceLabel = new JLabel("Saldo Total: R$ 0.00");
-        incomeLabel = new JLabel("Receitas: R$ 0.00");
-        expenseLabel = new JLabel("Despesas: R$ 0.00");
+        balanceLabel = new JLabel(String.format("Saldo Total: R$ %.2f", user.getTotalTransacoes()));
+        incomeLabel = new JLabel(String.format("Receitas: R$ %.2f", user.getTotalReceitas()));
+        expenseLabel = new JLabel(String.format("Despesas: R$ %.2f", user.getTotalDespesas()));
 
         summaryPanel.add(balanceLabel);
         summaryPanel.add(incomeLabel);
@@ -88,6 +88,10 @@ public class FinanceManagerScreen extends JFrame {
 
         JTextField newCategoryField = new JTextField();
         newCategoryField.setPreferredSize(new Dimension(100, 150));
+        for (int i = 0; i < 10; i++) {
+            newCategoryField.setText("Categoria " + i);
+        }
+//        newCategoryField.setText("Categoria");
         categoryPanel.add(newCategoryField, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel();

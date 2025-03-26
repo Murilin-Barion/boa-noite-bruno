@@ -4,12 +4,12 @@ import java.time.LocalDate;
 
 public class Transacao {
     private String tipo;
-    private String categoria;
+    private Categoria categoria;
     private LocalDate data;
     private String descricao;
     private double valor;
 
-    public Transacao(String tipo, String categoria, LocalDate data, String descricao, double valor) {
+    public Transacao(String tipo, Categoria categoria, LocalDate data, String descricao, double valor) {
         this.tipo = tipo;
         this.categoria = categoria; // Inicalmente como string, mas depois como objeto
         this.data = data;
@@ -31,5 +31,9 @@ public class Transacao {
 
     public String getDescricao() {
         return descricao;
+    }
+
+    public Categoria getCategoria() {
+        return categoria;
     }
 }

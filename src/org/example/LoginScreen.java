@@ -73,7 +73,7 @@ public class LoginScreen extends JFrame {
                 String email = userField.getText();
                 String senha = new String(passwordField.getPassword());
 
-                Usuario usuario = BancoUsuarios.autenticar(email, senha);
+                Usuario usuario = BancoDados.autenticarUsuario(email, senha);
 
                 if (usuario == null) {
                     JOptionPane.showMessageDialog(LoginScreen.this, "Email ou senha incorretos.", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -205,7 +205,7 @@ class RegisterScreen extends JFrame {
                     JOptionPane.showMessageDialog(RegisterScreen.this, "Por favor, preencha todos os campos.", "Erro", JOptionPane.ERROR_MESSAGE);
                 } else {
                     Usuario novoUsuario = new Usuario(name, email, password);
-                    BancoUsuarios.adicionarUsuario(novoUsuario);
+                    BancoDados.adicionarUsuario(novoUsuario);
                     JOptionPane.showMessageDialog(RegisterScreen.this, "Cadastro realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                     new LoginScreen();
                     dispose();
