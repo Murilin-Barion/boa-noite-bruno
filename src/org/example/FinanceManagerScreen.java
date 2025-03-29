@@ -8,7 +8,7 @@ public class FinanceManagerScreen extends JFrame {
     private JComboBox<String> categoryComboBox, typeComboBox;
     private JLabel balanceLabel, incomeLabel, expenseLabel;
 
-    public FinanceManagerScreen(String username) {
+    public FinanceManagerScreen(Usuario user) {
         setTitle("Gerenciador Financeiro");
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -16,7 +16,7 @@ public class FinanceManagerScreen extends JFrame {
 
         // Barra de menu do usuário
         JMenuBar menuBar = new JMenuBar();
-        JMenu userMenu = new JMenu("Usuário: " + username);
+        JMenu userMenu = new JMenu("Usuário: " + user.getNome());
         JMenuItem logoutItem = new JMenuItem("Sair");
         logoutItem.addActionListener(e -> {
             this.dispose();
@@ -36,7 +36,7 @@ public class FinanceManagerScreen extends JFrame {
         formPanel.setBorder(BorderFactory.createTitledBorder("Cadastro de Transações"));
 
         formPanel.add(new JLabel("Tipo:"));
-        typeComboBox = new JComboBox<>(new String[]{"Receita", "Despesa"});
+        typeComboBox = new JComboBox<>(new String[]{"Receita (+)", "Despesa (-)"});
         formPanel.add(typeComboBox);
 
         formPanel.add(new JLabel("Categoria:"));
@@ -73,9 +73,9 @@ public class FinanceManagerScreen extends JFrame {
         summaryPanel.setLayout(new GridLayout(3, 1, 10, 10));
         summaryPanel.setBorder(BorderFactory.createTitledBorder("Resumo Financeiro"));
 
-        balanceLabel = new JLabel("Saldo Total: R$ 0.00");
-        incomeLabel = new JLabel("Receitas: R$ 0.00");
-        expenseLabel = new JLabel("Despesas: R$ 0.00");
+        balanceLabel = new JLabel(String.format("Saldo Total: R$ %.2f", user.getTotalTransacoes()));
+        incomeLabel = new JLabel(String.format("Receitas: R$ %.2f", user.getTotalReceitas()));
+        expenseLabel = new JLabel(String.format("Despesas: R$ %.2f", user.getTotalDespesas()));
 
         summaryPanel.add(balanceLabel);
         summaryPanel.add(incomeLabel);
@@ -88,6 +88,10 @@ public class FinanceManagerScreen extends JFrame {
 
         JTextField newCategoryField = new JTextField();
         newCategoryField.setPreferredSize(new Dimension(100, 150));
+        for (int i = 0; i < 10; i++) {
+            newCategoryField.setText("Categoria " + i);
+        }
+//        newCategoryField.setText("Categoria");
         categoryPanel.add(newCategoryField, BorderLayout.NORTH);
 
         JPanel buttonPanel = new JPanel();
