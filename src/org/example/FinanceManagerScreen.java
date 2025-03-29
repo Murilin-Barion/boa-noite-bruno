@@ -16,6 +16,8 @@ public class FinanceManagerScreen extends JFrame {
     private JTextField valueField, dateField, descriptionField;
     private JComboBox<String> categoryComboBox, typeComboBox;
     private JLabel balanceLabel, incomeLabel, expenseLabel;
+    private DefaultListModel<String> categoryListModel;
+    private JList<String> categoryList;
 
     public FinanceManagerScreen(Usuario user) {
         setTitle("Gerenciador Financeiro");
@@ -84,7 +86,8 @@ public class FinanceManagerScreen extends JFrame {
                 String descricao = (String) descriptionField.getText();
                 String valor = (String) valueField.getText();
 
-                if (tipo == null || data == null || descricao == null || valor == null) {
+                if (tipo == null || categoria == null || data == null || descricao == null || valor == null) {
+                    data.contains("_");
                     JOptionPane.showMessageDialog(null, "Preencha todos os campos!", "Erro", JOptionPane.ERROR_MESSAGE);
                     return;
                 }else {
@@ -108,9 +111,102 @@ public class FinanceManagerScreen extends JFrame {
         historyPanel.setLayout(new BorderLayout());
         historyPanel.setBorder(BorderFactory.createTitledBorder("Histórico de Transações"));
 
+        //painel de filtros
+        JPanel filterPanel = new JPanel(new GridBagLayout());
+        filterPanel.setBorder(BorderFactory.createTitledBorder("Filtrar Transações"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Filtro por data
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        filterPanel.add(new JLabel("Data Inicial:"), gbc);
+
+        gbc.gridx = 1;
+        JFormattedTextField startDateField;
+        try {
+            startDateField = new JFormattedTextField(new MaskFormatter("##/##/####"));
+            startDateField.setColumns(10);
+            filterPanel.add(startDateField, gbc);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        gbc.gridx = 2;
+        filterPanel.add(new JLabel("Data Final:"), gbc);
+
+        gbc.gridx = 3;
+        JFormattedTextField endDateField;
+        try {
+            endDateField = new JFormattedTextField(new MaskFormatter("##/##/####"));
+            endDateField.setColumns(10);
+            filterPanel.add(endDateField, gbc);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        // Filtro por tipo
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        filterPanel.add(new JLabel("Tipo:"), gbc);
+
+        gbc.gridx = 1;
+        JComboBox<String> filterTypeCombo = new JComboBox<>(new String[]{"Todos", "Receita", "Despesa"});
+        filterPanel.add(filterTypeCombo, gbc);
+
+        // Filtro por categoria
+        gbc.gridx = 2;
+        filterPanel.add(new JLabel("Categoria:"), gbc);
+
+        gbc.gridx = 3;
+        JComboBox<String> managerCategoryCombo = new JComboBox<>();
+        managerCategoryCombo.addItem("Todas");
+
+        // Verifica se a lista de categorias não é nula antes de iterar
+        List<Categoria> categoriasUsuario = user.getCategorias();
+        if(categoriasUsuario != null) {
+            for (Categoria categoria : categoriasUsuario) {
+                managerCategoryCombo.addItem(categoria.getDescricao());
+            }
+        }
+
+        // E no trecho onde mostra as categorias no painel de gerenciamento
+        List<Categoria> listCategories = user.getCategorias();
+        JPanel listCategoryContainer = new JPanel();
+        listCategoryContainer .setLayout(new BoxLayout(listCategoryContainer, BoxLayout.Y_AXIS));
+        if(listCategories != null && !categoriasUsuario.isEmpty()) {
+            for (Categoria categoria : listCategories) {
+                JTextField newCategoryField = new JTextField(categoria.getDescricao());
+                newCategoryField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+                listCategoryContainer.add(newCategoryField);
+            }
+        }
+        filterPanel.add(managerCategoryCombo, gbc);
+
+        // Botão de filtrar
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 4;
+        gbc.fill = GridBagConstraints.CENTER;
+        JButton filterButton = new JButton("Aplicar Filtros");
+        filterPanel.add(filterButton, gbc);
+
+        historyPanel.add(filterPanel, BorderLayout.NORTH);
+
         List<String> transactionDescriptions = new ArrayList<>();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         for (Transacao transacao : user.getTransacoes()) {
-            transactionDescriptions.add(transacao.getDescricao()); // ou qualquer outro campo que seja String
+            String entry = String.format("%-10s | %-7s | %-20s | R$ %8.2f | %s",
+                    transacao.getData().format(dateFormatter),
+                    transacao.getTipo(),
+                    transacao.getDescricao().length() > 20 ?
+                            transacao.getDescricao().substring(0, 17) + "..." :
+                            transacao.getDescricao(),
+                    transacao.getValor(),
+                    transacao.getCategoria().getDescricao());
+
+            transactionDescriptions.add(entry);
         }
 
         JList<String> transactionList = new JList<>(transactionDescriptions.toArray(new String[0]));
@@ -136,45 +232,86 @@ public class FinanceManagerScreen extends JFrame {
         categoryPanel.setLayout(new BorderLayout(10, 10));
         categoryPanel.setBorder(BorderFactory.createTitledBorder("Gerenciamento de Categorias"));
 
-        List<Categoria> categories = user.getCategorias();
+        // Lista de categorias
+        categoryListModel = new DefaultListModel<>();
+        updateCategoryList(user);
 
-        JPanel categoryContainer = new JPanel();
-        categoryContainer.setLayout(new BoxLayout(categoryContainer, BoxLayout.Y_AXIS)); // Organiza os campos verticalmente
+        categoryList = new JList<>(categoryListModel);
+        categoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane categoryScrollPane = new JScrollPane(categoryList);
+        categoryPanel.add(categoryScrollPane, BorderLayout.CENTER);
 
-        if(categories != null && !categories.isEmpty() ) {
-            for (Categoria categoria : categories) {
-                JTextField newCategoryField = new JTextField(categoria.getDescricao());
-                newCategoryField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30)); // Ajusta a largura
-                categoryContainer.add(newCategoryField);
-            }
-        }
-
-        // Adiciona o painel dentro de um JScrollPane
-        JScrollPane categoryScrollPane = new JScrollPane(categoryContainer);
-        categoryScrollPane.setPreferredSize(new Dimension(150, 180)); // Ajuste conforme necessário
-        categoryScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        categoryScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        // Adiciona o JScrollPane ao painel principal onde estava seu campo de texto original
-        categoryPanel.add(categoryScrollPane, BorderLayout.NORTH);
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        // Painel de botões
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
 
         JButton addCategoryButton = new JButton("Adicionar Categoria");
         JButton editCategoryButton = new JButton("Editar Categoria");
         JButton deleteCategoryButton = new JButton("Excluir Categoria");
 
-        Dimension buttonSize = new Dimension(150, 30);
-        addCategoryButton.setPreferredSize(buttonSize);
-        editCategoryButton.setPreferredSize(buttonSize);
-        deleteCategoryButton.setPreferredSize(buttonSize);
+        // Listeners dos botões
+        addCategoryButton.addActionListener(e -> {
+            String novaCategoria = JOptionPane.showInputDialog(this, "Digite o nome da nova categoria:");
+            if (novaCategoria != null && !novaCategoria.trim().isEmpty()) {
+                if (user.adicionarCategoria(new Categoria(novaCategoria.trim()))) {
+                    updateCategoryList(user);
+                    updateCategoryComboBoxes(user);
+                    JOptionPane.showMessageDialog(this, "Categoria adicionada com sucesso!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Erro: Categoria já existe ou é inválida!", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        editCategoryButton.addActionListener(e -> {
+            int selectedIndex = categoryList.getSelectedIndex();
+            if (selectedIndex == -1) {
+                JOptionPane.showMessageDialog(this, "Selecione uma categoria para editar!", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String novoNome = JOptionPane.showInputDialog(this, "Digite o novo nome para a categoria:",
+                    user.getCategorias().get(selectedIndex).getDescricao());
+
+            if (novoNome != null && !novoNome.trim().isEmpty()) {
+                if (user.editarCategoria(selectedIndex, novoNome.trim())) {
+                    updateCategoryList(user);
+                    updateCategoryComboBoxes(user);
+                    JOptionPane.showMessageDialog(this, "Categoria editada com sucesso!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Erro: Nome inválido ou já existente!", "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        deleteCategoryButton.addActionListener(e -> {
+            int selectedIndex = categoryList.getSelectedIndex();
+            if (selectedIndex == -1) {
+                JOptionPane.showMessageDialog(this, "Selecione uma categoria para excluir!", "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Tem certeza que deseja excluir a categoria '" +
+                            user.getCategorias().get(selectedIndex).getDescricao() + "'?",
+                    "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                if (user.removerCategoria(selectedIndex)) {
+                    updateCategoryList(user);
+                    updateCategoryComboBoxes(user);
+                    JOptionPane.showMessageDialog(this, "Categoria excluída com sucesso!");
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Erro: Não é possível excluir esta categoria pois ela está em uso por alguma transação!",
+                            "Erro", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
 
         buttonPanel.add(addCategoryButton);
         buttonPanel.add(editCategoryButton);
         buttonPanel.add(deleteCategoryButton);
-
-        categoryPanel.add(buttonPanel, BorderLayout.CENTER);
+        categoryPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         // Adicionando os painéis ao painel principal
         JPanel leftPanel = new JPanel();
@@ -193,4 +330,25 @@ public class FinanceManagerScreen extends JFrame {
         add(mainPanel);
         setVisible(true);
     }
+
+    // Atualiza a lista de categorias exibida na interface gráfica.
+    private void updateCategoryList(Usuario user) {
+        categoryListModel.clear();
+        if (user.getCategorias() != null) {
+            for (Categoria categoria : user.getCategorias()) {
+                categoryListModel.addElement(categoria.getDescricao());
+            }
+        }
+    }
+
+    private void updateCategoryComboBoxes(Usuario user) {
+        // Remove todos os itens atuais do combobox
+        categoryComboBox.removeAllItems();
+        if (user.getCategorias() != null) {
+            for (Categoria categoria : user.getCategorias()) {
+                categoryComboBox.addItem(categoria.getDescricao());
+            }
+        }
+    }
+
 }

@@ -15,6 +15,7 @@ public class Usuario {
         this.email = email;
         this.senha = senha;
         this.transacoes = new ArrayList<>();
+        this.categorias = new ArrayList<>();
     }
 
     public String getNome() {
@@ -37,13 +38,52 @@ public class Usuario {
         return transacoes;
     }
 
-    public void adicionarCategoria(Categoria categoria) {
-        if (categorias == null) {
-            categorias = new ArrayList<>();
+    public boolean adicionarCategoria(Categoria categoria) {
+        if (categoria == null || categoria.getDescricao() == null || categoria.getDescricao().trim().isEmpty()) {
+            return false;
         }
-        if (!categorias.contains(categoria)) {
-            categorias.add(categoria);
+
+        // Verifica se já existe uma categoria com essa descrição (case insensitive)
+        for (Categoria cat : categorias) {
+            if (cat.getDescricao().equalsIgnoreCase(categoria.getDescricao())) {
+                return false;
+            }
         }
+
+        categorias.add(categoria);
+        return true;
+    }
+
+    public boolean editarCategoria(int index, String novaDescricao) {
+        if (index < 0 || index >= categorias.size() || novaDescricao == null || novaDescricao.trim().isEmpty()) {
+            return false;
+        }
+
+        // Verifica se já existe outra categoria com essa descrição
+        for (int i = 0; i < categorias.size(); i++) {
+            if (i != index && categorias.get(i).getDescricao().equalsIgnoreCase(novaDescricao)) {
+                return false;
+            }
+        }
+
+        categorias.get(index).setDescricao(novaDescricao);
+        return true;
+    }
+
+    public boolean removerCategoria(int index) {
+        if (index < 0 || index >= categorias.size()) {
+            return false;
+        }
+
+        // Verifica se existem transações usando esta categoria
+        for (Transacao transacao : transacoes) {
+            if (transacao.getCategoria().equals(categorias.get(index))) {
+                return false; // Não permite remover categoria em uso
+            }
+        }
+
+        categorias.remove(index);
+        return true;
     }
 
     public List<Categoria> getCategorias() {

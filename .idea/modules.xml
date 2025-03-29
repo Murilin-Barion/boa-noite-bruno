@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Atividade_Parcial.iml" filepath="$PROJECT_DIR$/.idea/Atividade_Parcial.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Gerenciador_financeiro.iml" filepath="$PROJECT_DIR$/Gerenciador_financeiro.iml" />
     </modules>
   </component>
 </project>
