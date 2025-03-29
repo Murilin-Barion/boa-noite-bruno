@@ -8,6 +8,7 @@ public class Usuario {
     private String email;
     private String senha;
     private List<Transacao> transacoes;
+    private List<Categoria> categorias;
 
     public Usuario(String nome, String email, String senha) {
         this.nome = nome;
@@ -34,6 +35,19 @@ public class Usuario {
 
     public List<Transacao> getTransacoes() {
         return transacoes;
+    }
+
+    public void adicionarCategoria(Categoria categoria) {
+        if (categorias == null) {
+            categorias = new ArrayList<>();
+        }
+        if (!categorias.contains(categoria)) {
+            categorias.add(categoria);
+        }
+    }
+
+    public List<Categoria> getCategorias() {
+        return categorias;
     }
 
     public double getTotalTransacoes(){

@@ -5,7 +5,6 @@ import java.util.List;
 
 public class BancoDados {
     private static List<Usuario> usuarios = new ArrayList<>();
-    private static List<Categoria> categorias = new ArrayList<>();
 
     public static void adicionarUsuario(Usuario usuario) {
         if (!usuarios.contains(usuario)) {
@@ -24,15 +23,5 @@ public class BancoDados {
 
     public static List<Usuario> getUsuarios() {
         return usuarios;
-    }
-
-    public static void adicionarCategoria(Categoria categoria) {
-        if (!categorias.contains(categoria)) {
-            categorias.add(categoria);
-        }
-    }
-
-    public static List<Categoria> getCategorias() {
-        return categorias;
     }
 }
