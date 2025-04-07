@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.ParseException;
 
 public class LoginScreen extends JFrame {
     private JTextField userField;
@@ -78,7 +79,11 @@ public class LoginScreen extends JFrame {
                 if (usuario == null) {
                     JOptionPane.showMessageDialog(LoginScreen.this, "Email ou senha incorretos.", "Erro", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    new FinanceManagerScreen(usuario).setVisible(true);
+                    try {
+                        new FinanceManagerScreen(usuario).setVisible(true);
+                    } catch (ParseException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     dispose();
                 }
             }

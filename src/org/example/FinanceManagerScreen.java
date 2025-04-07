@@ -10,16 +10,15 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class FinanceManagerScreen extends JFrame {
     private JTextField valueField, dateField, descriptionField;
-    private JComboBox<String> categoryComboBox, typeComboBox;
+    private JComboBox<String> categoryComboBox, typeComboBox, managerCategoryCombo;
     private JLabel balanceLabel, incomeLabel, expenseLabel;
     private DefaultListModel<String> categoryListModel;
     private JList<String> categoryList;
 
-    public FinanceManagerScreen(Usuario user) {
+    public FinanceManagerScreen(Usuario user) throws ParseException {
         setTitle("Gerenciador Financeiro");
         setSize(900, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -97,7 +96,11 @@ public class FinanceManagerScreen extends JFrame {
                     user.adicionarTransacao(transaction);
 
                     JOptionPane.showMessageDialog(FinanceManagerScreen.this, "Cadastro realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                    new FinanceManagerScreen(user);
+                    try {
+                        new FinanceManagerScreen(user);
+                    } catch (ParseException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     dispose();
                 }
 
@@ -125,26 +128,19 @@ public class FinanceManagerScreen extends JFrame {
 
         gbc.gridx = 1;
         JFormattedTextField startDateField;
-        try {
-            startDateField = new JFormattedTextField(new MaskFormatter("##/##/####"));
-            startDateField.setColumns(10);
-            filterPanel.add(startDateField, gbc);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        startDateField = new JFormattedTextField(new MaskFormatter("##/##/####"));
+        startDateField.setColumns(10);
+        filterPanel.add(startDateField, gbc);
+
 
         gbc.gridx = 2;
         filterPanel.add(new JLabel("Data Final:"), gbc);
 
         gbc.gridx = 3;
         JFormattedTextField endDateField;
-        try {
-            endDateField = new JFormattedTextField(new MaskFormatter("##/##/####"));
-            endDateField.setColumns(10);
-            filterPanel.add(endDateField, gbc);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        endDateField = new JFormattedTextField(new MaskFormatter("##/##/####"));
+        endDateField.setColumns(10);
+        filterPanel.add(endDateField, gbc);
 
         // Filtro por tipo
         gbc.gridx = 0;
@@ -160,7 +156,7 @@ public class FinanceManagerScreen extends JFrame {
         filterPanel.add(new JLabel("Categoria:"), gbc);
 
         gbc.gridx = 3;
-        JComboBox<String> managerCategoryCombo = new JComboBox<>();
+        managerCategoryCombo = new JComboBox<>();
         managerCategoryCombo.addItem("Todas");
 
         // Verifica se a lista de categorias não é nula antes de iterar
@@ -255,6 +251,7 @@ public class FinanceManagerScreen extends JFrame {
                 if (user.adicionarCategoria(new Categoria(novaCategoria.trim()))) {
                     updateCategoryList(user);
                     updateCategoryComboBoxes(user);
+                    updateManagerCategoryComboBox(user);
                     JOptionPane.showMessageDialog(this, "Categoria adicionada com sucesso!");
                 } else {
                     JOptionPane.showMessageDialog(this, "Erro: Categoria já existe ou é inválida!", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -276,6 +273,7 @@ public class FinanceManagerScreen extends JFrame {
                 if (user.editarCategoria(selectedIndex, novoNome.trim())) {
                     updateCategoryList(user);
                     updateCategoryComboBoxes(user);
+                    updateManagerCategoryComboBox(user);
                     JOptionPane.showMessageDialog(this, "Categoria editada com sucesso!");
                 } else {
                     JOptionPane.showMessageDialog(this, "Erro: Nome inválido ou já existente!", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -299,6 +297,7 @@ public class FinanceManagerScreen extends JFrame {
                 if (user.removerCategoria(selectedIndex)) {
                     updateCategoryList(user);
                     updateCategoryComboBoxes(user);
+                    updateManagerCategoryComboBox(user);
                     JOptionPane.showMessageDialog(this, "Categoria excluída com sucesso!");
                 } else {
                     JOptionPane.showMessageDialog(this,
@@ -329,6 +328,66 @@ public class FinanceManagerScreen extends JFrame {
 
         add(mainPanel);
         setVisible(true);
+
+        // Adicionando o ActionListener ao botão de filtro
+        filterButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String startDateStr = startDateField.getText();
+                String endDateStr = endDateField.getText();
+                String filterType = (String) filterTypeCombo.getSelectedItem();
+                String filterCategory = (String) managerCategoryCombo.getSelectedItem();
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                LocalDate startDate = null;
+                LocalDate endDate = null;
+
+                try {
+                    if (!startDateStr.contains("_")) {
+                        startDate = LocalDate.parse(startDateStr, formatter);
+                    }
+                    if (!endDateStr.contains("_")) {
+                        endDate = LocalDate.parse(endDateStr, formatter);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(FinanceManagerScreen.this, "Datas inválidas!", "Erro", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                List<String> filteredDescriptions = new ArrayList<>();
+                for (Transacao transacao : user.getTransacoes()) {
+                    boolean matches = true;
+
+                    if (startDate != null && transacao.getData().isBefore(startDate)) {
+                        matches = false;
+                    }
+                    if (endDate != null && transacao.getData().isAfter(endDate)) {
+                        matches = false;
+                    }
+                    if (!filterType.equals("Todos") && !transacao.getTipo().equalsIgnoreCase(filterType)) {
+                        matches = false;
+                    }
+                    if (!filterCategory.equals("Todas") && !transacao.getCategoria().getDescricao().equalsIgnoreCase(filterCategory)) {
+                        matches = false;
+                    }
+
+                    if (matches) {
+                        String entry = String.format("%-10s | %-7s | %-20s | R$ %8.2f | %s",
+                                transacao.getData().format(formatter),
+                                transacao.getTipo(),
+                                transacao.getDescricao().length() > 20 ?
+                                        transacao.getDescricao().substring(0, 17) + "..." :
+                                        transacao.getDescricao(),
+                                transacao.getValor(),
+                                transacao.getCategoria().getDescricao());
+
+                        filteredDescriptions.add(entry);
+                    }
+                }
+
+                transactionList.setListData(filteredDescriptions.toArray(new String[0]));
+            }
+        });
     }
 
     // Atualiza a lista de categorias exibida na interface gráfica.
@@ -351,4 +410,14 @@ public class FinanceManagerScreen extends JFrame {
         }
     }
 
+    private void updateManagerCategoryComboBox(Usuario user) {
+        // Remove todos os itens atuais do combobox
+        managerCategoryCombo.removeAllItems();
+        managerCategoryCombo.addItem("Todas");
+        if (user.getCategorias() != null) {
+            for (Categoria categoria : user.getCategorias()) {
+                managerCategoryCombo.addItem(categoria.getDescricao());
+            }
+        }
+    }
 }
