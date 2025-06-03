@@ -207,35 +207,82 @@ public class FinanceManagerScreen extends JFrame {
         addCategoryButton.addActionListener(e -> {
             String novaCategoriaDesc = JOptionPane.showInputDialog(this, "Digite o nome da nova categoria:");
             if (novaCategoriaDesc != null && !novaCategoriaDesc.trim().isEmpty()) {
-                try (Session session = HibernateUtil.openSession()) {
-                    CategoriaDAO categoriaDAO = new CategoriaDAOImpl(session);
-                    UsuarioDAO usuarioDAO = new UsuarioDAOImpl(session);
 
-                    if (categoriaDAO.findByUsuarioAndDescricao(currentUser, novaCategoriaDesc.trim()) != null) {
-                        JOptionPane.showMessageDialog(this, "Erro: Categoria com este nome já existe!", "Erro", JOptionPane.ERROR_MESSAGE);
-                        return;
+                addCategoryButton.setEnabled(false);
+
+                SwingWorker<Categoria, Void> worker = new SwingWorker<Categoria, Void>() {
+                    private Exception error = null;
+                    private boolean alreadyExists = false;
+                    private Categoria savedCategoria = null;
+
+                    @Override
+                    protected Categoria doInBackground() throws Exception {
+                        try (Session session = HibernateUtil.openSession()) {
+                            CategoriaDAO categoriaDAO = new CategoriaDAOImpl(session);
+
+                            if (categoriaDAO.findByUsuarioAndDescricao(currentUser, novaCategoriaDesc.trim()) != null) {
+                                alreadyExists = true;
+                                return null;
+                            }
+
+                            Categoria novaCategoria = new Categoria(novaCategoriaDesc.trim(), currentUser);
+
+                            categoriaDAO.save(novaCategoria);
+
+                            savedCategoria = novaCategoria;
+                            return savedCategoria;
+
+                        } catch (Exception ex) {
+                            this.error = ex;
+                            return null;
+                        }
                     }
 
-                    Categoria novaCategoria = new Categoria(novaCategoriaDesc.trim(), currentUser);
-                    if (currentUser.adicionarCategoria(novaCategoria)) {
-                        categoriaDAO.save(novaCategoria);
+                    @Override
+                    protected void done() {
+                        try {
+                            if (error != null) {
+                                JOptionPane.showMessageDialog(FinanceManagerScreen.this, "Erro ao adicionar categoria: " + error.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                                error.printStackTrace();
+                            } else if (alreadyExists) {
+                                JOptionPane.showMessageDialog(FinanceManagerScreen.this, "Erro: Categoria com este nome já existe!", "Erro", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                Categoria resultCategoria = get();
 
-                        JOptionPane.showMessageDialog(this, "Categoria adicionada com sucesso!");
+                                if (resultCategoria != null) {
+                                    if (currentUser.getCategorias() == null) {
+                                        currentUser.setCategorias(new ArrayList<>()); // Initialize if null
+                                    }
+                                    boolean found = false;
+                                    for(Categoria cat : currentUser.getCategorias()) {
+                                        if(cat.getId() != null && cat.getId().equals(resultCategoria.getId())) {
+                                            found = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!found) {
+                                        currentUser.getCategorias().add(resultCategoria);
+                                    }
 
-                        currentUser = usuarioDAO.findById(currentUser.getId());
-                        org.hibernate.Hibernate.initialize(currentUser.getCategorias());
+                                    updateCategoryList(currentUser);
+                                    updateCategoryComboBoxes(currentUser);
+                                    updateManagerCategoryComboBox(currentUser);
 
-                        updateCategoryList(currentUser);
-                        updateCategoryComboBoxes(currentUser);
-                        updateManagerCategoryComboBox(currentUser);
-                        updateFinanceData();
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Erro: Categoria inválida!", "Erro", JOptionPane.ERROR_MESSAGE);
+
+                                    JOptionPane.showMessageDialog(FinanceManagerScreen.this, "Categoria adicionada com sucesso!");
+                                } else if (!alreadyExists) {
+                                    JOptionPane.showMessageDialog(FinanceManagerScreen.this, "Erro: Não foi possível adicionar a categoria.", "Erro", JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(FinanceManagerScreen.this, "Erro ao finalizar adição de categoria: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                            ex.printStackTrace();
+                        } finally {
+                            addCategoryButton.setEnabled(true);
+                        }
                     }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Erro ao adicionar categoria: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-                    ex.printStackTrace();
-                }
+                };
+                worker.execute();
             }
         });
 
