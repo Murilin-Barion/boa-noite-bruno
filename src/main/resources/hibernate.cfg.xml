@@ -3,20 +3,29 @@
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
+        <!-- Database connection settings -->
         <property name="hibernate.connection.url">jdbc:sqlite:./data/finance_manager.db</property>
         <property name="hibernate.connection.driver_class">org.sqlite.JDBC</property>
         <property name="hibernate.connection.username"></property>
         <property name="hibernate.connection.password"></property>
 
+        <!-- JDBC connection pool (use a production pool in real apps) -->
+        <!-- <property name="hibernate.connection.pool_size">1</property> -->
+
+        <!-- SQL dialect -->
         <property name="hibernate.dialect">org.hibernate.community.dialect.SQLiteDialect</property>
 
-        <property name="hibernate.hbm2ddl.auto">update</property>
+        <!-- Echo all executed SQL to stdout -->
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
 
-        <mapping class="org.example.Usuario"/>
-        <mapping class="org.example.Categoria"/>
-        <mapping class="org.example.Transacao"/>
+        <!-- Drop and re-create the database schema on startup -->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+
+        <!-- Mapped entity classes -->
+        <mapping class="org.example.model.Usuario"/>
+        <mapping class="org.example.model.Categoria"/>
+        <mapping class="org.example.model.Transacao"/>
 
     </session-factory>
 </hibernate-configuration>

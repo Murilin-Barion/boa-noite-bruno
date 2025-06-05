@@ -15,21 +15,47 @@
     </properties>
 
     <dependencies>
+        <!-- Hibernate Core -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>6.5.0.Final</version>
+            <version>6.5.0.Final</version> <!-- Use a recent stable version -->
         </dependency>
+
+        <!-- Jakarta Persistence API (Needed for annotations like @Entity, @Id) -->
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version> <!-- Align with Hibernate's requirements if possible -->
+        </dependency>
+
+        <!-- SQLite JDBC Driver -->
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.49.1.0</version>
+            <version>3.49.1.0</version> <!-- Check for latest version -->
         </dependency>
+
+        <!-- Hibernate Community Dialects (Includes SQLite dialect) -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-community-dialects</artifactId>
-            <version>6.6.5.Final</version>
+            <version>6.5.0.Final</version> <!-- Match hibernate-core version -->
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version> <!-- Use a recent version -->
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
