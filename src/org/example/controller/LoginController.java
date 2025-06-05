@@ -18,12 +18,10 @@ public class LoginController {
             usuario = usuarioDAO.findByEmailAndPassword(email, senha);
 
             if (usuario != null) {
-                // Inicializa coleções lazy para evitar LazyInitializationException fora da sessão
                 Hibernate.initialize(usuario.getTransacoes());
                 Hibernate.initialize(usuario.getCategorias());
             }
         } catch (Exception e) {
-            // Logar a exceção seria uma boa prática aqui
             System.err.println("Erro ao tentar fazer login: " + e.getMessage());
             e.printStackTrace();
             throw new Exception("Erro ao processar login: " + e.getMessage(), e);
