@@ -19,9 +19,6 @@ public class FinanceController {
     private Usuario currentUser;
 
     public FinanceController(Usuario user) {
-        // It's generally better to load the full user data here or ensure it's loaded
-        // For simplicity, we'll assume the user object passed might need lazy collections initialized
-        // A better approach might be to pass userId and load within the controller
         this.currentUser = loadFullUserData(user.getId());
     }
 
@@ -39,7 +36,6 @@ public class FinanceController {
         } catch (Exception e) {
             System.err.println("Erro ao carregar dados completos do usuário: " + e.getMessage());
             e.printStackTrace();
-            // Handle error appropriately, maybe throw a custom exception
             return null;
         } finally {
             if (session != null && session.isOpen()) {
@@ -49,24 +45,19 @@ public class FinanceController {
     }
 
     public Usuario getCurrentUser() {
-        // Return a potentially refreshed user object if needed, or just the loaded one
-        // For this example, returning the initially loaded one.
-        // Consider reloading if state might change outside controller actions.
         return currentUser;
     }
 
     public List<Categoria> getCategoriasDoUsuario() {
-        // Ensure categories are loaded
         if (currentUser != null && currentUser.getCategorias() != null) {
-            return new ArrayList<>(currentUser.getCategorias()); // Return a copy
+            return new ArrayList<>(currentUser.getCategorias());
         }
         return new ArrayList<>();
     }
 
     public List<Transacao> getTransacoesDoUsuario() {
-        // Ensure transactions are loaded
         if (currentUser != null && currentUser.getTransacoes() != null) {
-            return new ArrayList<>(currentUser.getTransacoes()); // Return a copy
+            return new ArrayList<>(currentUser.getTransacoes());
         }
         return new ArrayList<>();
     }
@@ -80,19 +71,16 @@ public class FinanceController {
 
             CategoriaDAO categoriaDAO = new CategoriaDAOImpl(session);
             TransacaoDAO transacaoDAO = new TransacaoDAOImpl(session);
-            UsuarioDAO usuarioDAO = new UsuarioDAOImpl(session); // Needed to refresh user
+            UsuarioDAO usuarioDAO = new UsuarioDAOImpl(session);
 
-            // Find the category object
             Categoria categoria = categoriaDAO.findByUsuarioAndDescricao(currentUser, categoriaDesc);
             if (categoria == null) {
                 throw new Exception("Categoria selecionada não encontrada.");
             }
 
-            // Create and save the transaction
             Transacao transaction = new Transacao(tipo, categoria, data, descricao, valor, currentUser);
             savedTransaction = transacaoDAO.save(transaction);
 
-            // Refresh user data after transaction
             this.currentUser = usuarioDAO.findById(currentUser.getId());
             Hibernate.initialize(currentUser.getTransacoes());
             Hibernate.initialize(currentUser.getCategorias());
@@ -122,7 +110,6 @@ public class FinanceController {
             CategoriaDAO categoriaDAO = new CategoriaDAOImpl(session);
             UsuarioDAO usuarioDAO = new UsuarioDAOImpl(session);
 
-            // Check if category already exists
             if (categoriaDAO.findByUsuarioAndDescricao(currentUser, novaCategoriaDesc.trim()) != null) {
                 throw new Exception("Categoria com este nome já existe!");
             }
@@ -130,10 +117,9 @@ public class FinanceController {
             Categoria novaCategoria = new Categoria(novaCategoriaDesc.trim(), currentUser);
             savedCategoria = categoriaDAO.save(novaCategoria);
 
-            // Refresh user data
             this.currentUser = usuarioDAO.findById(currentUser.getId());
             Hibernate.initialize(currentUser.getCategorias());
-            Hibernate.initialize(currentUser.getTransacoes()); // Keep consistent
+            Hibernate.initialize(currentUser.getTransacoes());
 
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -160,7 +146,6 @@ public class FinanceController {
             CategoriaDAO categoriaDAO = new CategoriaDAOImpl(session);
             UsuarioDAO usuarioDAO = new UsuarioDAOImpl(session);
 
-            // Check if another category with the new name already exists
             Categoria existenteComNovoNome = categoriaDAO.findByUsuarioAndDescricao(currentUser, novoNome.trim());
             if (existenteComNovoNome != null && !existenteComNovoNome.getId().equals(categoriaId)) {
                 throw new Exception("Já existe uma categoria com o nome '" + novoNome.trim() + "'.");
@@ -174,7 +159,6 @@ public class FinanceController {
             categoriaParaEditar.setDescricao(novoNome.trim());
             updatedCategoria = categoriaDAO.update(categoriaParaEditar);
 
-            // Refresh user data
             this.currentUser = usuarioDAO.findById(currentUser.getId());
             Hibernate.initialize(currentUser.getCategorias());
             Hibernate.initialize(currentUser.getTransacoes());
@@ -209,7 +193,6 @@ public class FinanceController {
                 throw new Exception("Categoria não encontrada ou não pertence a este usuário.");
             }
 
-            // Check for associated transactions
             long count = transacaoDAO.countByCategoria(categoriaParaExcluir);
             if (count > 0) {
                 throw new Exception("Não é possível excluir a categoria pois existem transações associadas a ela.");
@@ -217,7 +200,6 @@ public class FinanceController {
 
             categoriaDAO.delete(categoriaParaExcluir);
 
-            // Refresh user data
             this.currentUser = usuarioDAO.findById(currentUser.getId());
             Hibernate.initialize(currentUser.getCategorias());
             Hibernate.initialize(currentUser.getTransacoes());
@@ -254,7 +236,7 @@ public class FinanceController {
         } catch (Exception e) {
             System.err.println("Erro ao filtrar transações: " + e.getMessage());
             e.printStackTrace();
-            return new ArrayList<>(); // Return empty list on error
+            return new ArrayList<>();
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();
@@ -277,7 +259,6 @@ public class FinanceController {
         return new FinancialSummary(balance, totalIncome, totalExpense);
     }
 
-    // Inner class to hold summary data
     public static class FinancialSummary {
         public final double balance;
         public final double totalIncome;

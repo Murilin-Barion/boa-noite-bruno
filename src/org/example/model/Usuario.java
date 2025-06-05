@@ -28,7 +28,6 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Categoria> categorias = new ArrayList<>();
 
-    // Construtor padrão
     public Usuario() {
     }
 
@@ -38,7 +37,6 @@ public class Usuario {
         this.senha = senha;
     }
 
-    // --- Getters e Setters ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNome() { return nome; }
@@ -59,7 +57,7 @@ public class Usuario {
 
     public void adicionarTransacao(Transacao transacao) {
         this.transacoes.add(transacao);
-        transacao.setUsuario(this); // Garante a ligação bidirecional
+        transacao.setUsuario(this);
     }
 
     public boolean adicionarCategoria(Categoria categoria) {
@@ -72,7 +70,7 @@ public class Usuario {
             }
         }
         this.categorias.add(categoria);
-        categoria.setUsuario(this); // Garante a ligação bidirecional
+        categoria.setUsuario(this);
         return true;
     }
 

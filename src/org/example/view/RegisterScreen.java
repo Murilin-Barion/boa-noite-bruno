@@ -5,24 +5,20 @@ import org.example.controller.RegisterController;
 import javax.swing.*;
 import java.awt.*;
 
-// Tela de Cadastro com layout restaurado do original, mas usando Controller
 public class RegisterScreen extends JFrame {
     private JTextField nameField;
     private JTextField emailField;
     private JPasswordField passwordField;
-    private RegisterController registerController; // Controller para lidar com a lógica
+    private RegisterController registerController;
 
     public RegisterScreen() {
         this.registerController = new RegisterController();
 
         setTitle("Cadastro");
         setSize(900, 600);
-        // Alterado para DISPOSE_ON_CLOSE para não fechar a aplicação inteira,
-        // permitindo voltar para o Login se necessário.
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // --- Layout copiado do original --- 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setBackground(new Color(240, 240, 240));
@@ -81,7 +77,6 @@ public class RegisterScreen extends JFrame {
         registerButton.setBackground(new Color(50, 150, 250));
         registerButton.setForeground(Color.WHITE);
         registerButton.setFocusPainted(false);
-        // --- ActionListener modificado para usar o Controller --- 
         registerButton.addActionListener(e -> {
             String name = nameField.getText().trim();
             String email = emailField.getText().trim();
@@ -89,42 +84,36 @@ public class RegisterScreen extends JFrame {
 
             if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 JOptionPane.showMessageDialog(RegisterScreen.this, "Por favor, preencha todos os campos.", "Erro de Validação", JOptionPane.WARNING_MESSAGE);
-                return; // Impede o processamento se campos estiverem vazios
+                return;
             }
 
             try {
-                // Chama o método de registro do Controller
                 boolean success = registerController.registerUser(name, email, password);
                 if (success) {
                     JOptionPane.showMessageDialog(RegisterScreen.this, "Cadastro realizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-                    // Volta para a tela de Login após sucesso
                     new LoginScreen().setVisible(true);
-                    dispose(); // Fecha a tela de registro
+                    dispose();
                 } else {
-                    // Mensagem genérica caso o controller retorne false sem exceção (improvável com a lógica atual)
                     JOptionPane.showMessageDialog(RegisterScreen.this, "Erro desconhecido ao cadastrar usuário.", "Erro", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (Exception ex) {
-                // Exibe mensagens de erro específicas vindas do controller (ex: email já existe)
                 JOptionPane.showMessageDialog(RegisterScreen.this, "Erro ao cadastrar: " + ex.getMessage(), "Erro de Cadastro", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace(); // Log para debug
+                ex.printStackTrace();
             }
         });
 
-        // --- Painel de botão original (sem botão Voltar) --- 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setBackground(new Color(240, 240, 240));
         buttonPanel.add(registerButton);
 
         gbc.gridx = 0;
-        gbc.gridy = 5; // Posição original do botão
+        gbc.gridy = 5;
         gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(buttonPanel, gbc);
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
         add(mainPanel);
-        // setVisible(true); // Visibilidade controlada pelo chamador (LoginScreen)
     }
 }
 

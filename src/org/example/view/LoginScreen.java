@@ -7,11 +7,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.text.ParseException;
 
-// Tela de Login com layout restaurado do original, mas usando Controller
 public class LoginScreen extends JFrame {
     private JTextField userField;
     private JPasswordField passwordField;
-    private LoginController loginController; // Controller para lidar com a lógica
+    private LoginController loginController;
 
     public LoginScreen() {
         this.loginController = new LoginController();
@@ -21,7 +20,6 @@ public class LoginScreen extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // --- Layout copiado do original --- 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setBackground(new Color(240, 240, 240));
@@ -69,30 +67,25 @@ public class LoginScreen extends JFrame {
         loginButton.setBackground(new Color(50, 150, 250));
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
-        // --- ActionListener modificado para usar o Controller --- 
         loginButton.addActionListener(e -> {
             String email = userField.getText();
             String senha = new String(passwordField.getPassword());
 
             try {
-                // Chama o método de login do Controller
                 Usuario usuario = loginController.login(email, senha);
 
                 if (usuario == null) {
                     JOptionPane.showMessageDialog(LoginScreen.this, "Email ou senha incorretos.", "Erro de Login", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    // Usuário autenticado, abre a tela principal
-                    // O controller já cuidou de inicializar as coleções
                     try {
                         new FinanceManagerScreen(usuario).setVisible(true);
-                        dispose(); // Fecha a tela de login
+                        dispose();
                     } catch (ParseException ex) {
                         JOptionPane.showMessageDialog(LoginScreen.this, "Erro ao inicializar a tela financeira: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
                         ex.printStackTrace();
                     }
                 }
             } catch (Exception ex) {
-                // Captura exceções lançadas pelo controller
                 JOptionPane.showMessageDialog(LoginScreen.this, "Erro ao tentar fazer login: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
                 ex.printStackTrace();
             }
@@ -103,10 +96,9 @@ public class LoginScreen extends JFrame {
         registerButton.setBackground(new Color(50, 150, 250));
         registerButton.setForeground(Color.WHITE);
         registerButton.setFocusPainted(false);
-        // --- ActionListener modificado para apenas abrir a tela de registro --- 
         registerButton.addActionListener(e -> {
-            new RegisterScreen().setVisible(true); // Abre a tela de registro
-            dispose(); // Fecha a tela de login
+            new RegisterScreen().setVisible(true);
+            dispose();
         });
 
         JPanel buttonPanel = new JPanel();
@@ -122,7 +114,6 @@ public class LoginScreen extends JFrame {
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
         add(mainPanel);
-        // setVisible(true); // A visibilidade será controlada pelo Main
     }
 }
 
